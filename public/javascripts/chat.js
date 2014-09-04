@@ -140,9 +140,10 @@ $(document).ready(function() {
 
 		oldtime=nowtime;
 		var $msg = $("#input_content").text();
-		if ($msg.trim() == "")
+		if ($msg.trim() == ""){
 			$("#toolbar").text("请输入内容！！");
 			return;
+		}
 		//把发送的信息先添加到自己的浏览器 DOM 中
 		if (to == "all") {
 			$("#contents").append('<div>你(' + now() + ')对 所有人 说：<br/>' + $msg + '</div><br />');
