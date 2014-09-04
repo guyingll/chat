@@ -88,7 +88,7 @@ $(document).ready(function() {
 		$("#list").empty().append('<li title="双击聊天" alt="all" class="sayingto" onselectstart="return false">所有人</li>');
 		//遍历生成用户在线列表
 		for (var i in users) {
-			$("#list").append('<li alt="' + users[i] + '" title="双击聊天" onselectstart="return false">' + users[i] + '</li>');
+			$("#list").append('<li alt="' + i + '" title="双击聊天" onselectstart="return false">' + i+"("+users[i]+")" + '</li>');
 		}
 		//双击对某人聊天
 		$("#list > li").dblclick(function() {
