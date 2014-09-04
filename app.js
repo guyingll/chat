@@ -85,7 +85,6 @@ io.sockets.on('connection', function(socket) {
 			//向特定用户发送该用户发话信息
 			//clients 为存储所有连接对象的数组
 			// var clients = io.sockets.clients();
-			console.log(socketList);
 			var clients = socketList;
 			//遍历找到该用户
 			clients.forEach(function(client) {

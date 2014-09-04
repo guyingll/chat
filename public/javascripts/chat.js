@@ -5,7 +5,12 @@ $(document).ready(function() {
 				e.preventDefault();
 			}
 		}
+
+		if(e.keyCode == 13){
+			sendMessage();
+		};
 	});
+	var oldtime=new Date().getTime();
 
 	var socket = io.connect();
 
@@ -121,10 +126,22 @@ $(document).ready(function() {
 	
 
 	//发话
-	$("#say").click(function() {
+	$("#say").click(sendMessage);
+
+	function sendMessage() {
 		//获取要发送的信息
-		var $msg = $("#input_content").html();
-		if ($msg == "")
+		nowtime=new Date().getTime();
+		if(nowtime-oldtime<1000){
+			$("#toolbar").text("禁止刷屏");
+			return;
+		}else if($("#toolbar").text()){
+			$("#toolbar").text("");
+		}
+
+		oldtime=nowtime;
+		var $msg = $("#input_content").text();
+		if ($msg.trim() == "")
+			$("#toolbar").text("请输入内容！！");
 			return;
 		//把发送的信息先添加到自己的浏览器 DOM 中
 		if (to == "all") {
@@ -141,7 +158,7 @@ $(document).ready(function() {
 		//清空输入框并获得焦点
 		$("#input_content").html("").focus();
 		fixedScroll();
-	});
+	}
 
 });
 
