@@ -27,8 +27,11 @@ if ('development' == app.get('env')) {
 	app.use(express.errorHandler());
 }
 
-var users = {};
 //存储在线用户列表的对象
+var users = {};
+
+//存储socket列表
+var socketList = [];
 
 app.get('/', function(req, res) {
 	if (req.cookies.user == null) {
@@ -64,12 +67,14 @@ io.sockets.on('connection', function(socket) {
 		if (!users[data.user]) {
 			users[data.user] = data.user;
 		}
+		socketList.push(socket);
 		//向所有用户广播该用户上线信息
 		io.sockets.emit('online', {
 			users : users,
 			user : data.user
 		});
 	});
+
 
 	//有人发话
 	socket.on('say', function(data) {
@@ -79,7 +84,9 @@ io.sockets.on('connection', function(socket) {
 		} else {
 			//向特定用户发送该用户发话信息
 			//clients 为存储所有连接对象的数组
-			var clients = io.sockets.clients();
+			// var clients = io.sockets.clients();
+			console.log(socketList);
+			var clients = socketList;
 			//遍历找到该用户
 			clients.forEach(function(client) {
 				if (client.name == data.to) {
@@ -90,7 +97,7 @@ io.sockets.on('connection', function(socket) {
 		}
 	});
 
-	//有人下线
+	//有人下线	
 	socket.on('disconnect', function() {
 		//若 users 对象中保存了该用户名
 		if (users[socket.name]) {
