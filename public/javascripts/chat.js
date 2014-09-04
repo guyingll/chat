@@ -30,6 +30,7 @@ $(document).ready(function() {
 		flushUsers(data.users);
 		//显示正在对谁说话
 		showSayTo();
+		fixedScroll();
 	});
 
 	socket.on('say', function(data) {
@@ -41,6 +42,7 @@ $(document).ready(function() {
 		if (data.to == from) {
 			$("#contents").append('<div style="color:#00f" >' + data.from + '(' + now() + ')对 你 说：<br/>' + data.msg + '</div><br />');
 		}
+		fixedScroll();
 	});
 
 	socket.on('offline', function(data) {
@@ -55,6 +57,7 @@ $(document).ready(function() {
 		}
 		//显示正在对谁说话
 		showSayTo();
+		fixedScroll();
 	});
 
 	//服务器关闭
@@ -71,6 +74,7 @@ $(document).ready(function() {
 		socket.emit('online', {
 			user : from
 		});
+		fixedScroll();
 	});
 
 	//刷新用户在线列表
@@ -110,9 +114,14 @@ $(document).ready(function() {
 		return time;
 	}
 
+	//修改滚动条
+	function fixedScroll(){
+		$("#contents").scrollTop($("#contents")[0].scrollHeight);
+	}
+	
+
 	//发话
 	$("#say").click(function() {
-		console.log("tests");
 		//获取要发送的信息
 		var $msg = $("#input_content").html();
 		if ($msg == "")
@@ -131,6 +140,7 @@ $(document).ready(function() {
 		});
 		//清空输入框并获得焦点
 		$("#input_content").html("").focus();
+		fixedScroll();
 	});
 
 });
