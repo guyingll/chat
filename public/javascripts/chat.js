@@ -1,4 +1,57 @@
 $(document).ready(function() {
+	window.addEventListener("paste",pasteHander,false);
+	function pasteHander(e){
+		var items = e.clipboardData.items;
+      	if (items){
+      		for (var i = 0; i < items.length; i++) {
+	          if (items[i].type.indexOf("image") !== -1) {
+	            // We need to represent the image as a file,
+	            var blob = items[i].getAsFile();
+	            var reader = new FileReader();
+	        	reader.readAsDataURL(blob);
+	        	var imgobj=new Image(blob);
+	        	reader.onload = function(e){
+	                var binaryString = this.result;
+	                imgobj.src=binaryString;
+	                var imgwidth=imgobj.width,imgheight=imgobj.height;
+	                console.log(imgwidth)
+	                if(imgobj.width>600){
+	                	imgobj.height=600/imgwidth*imgheight;
+	                	imgobj.width=600;
+	                };
+	                $("#input_content").append(imgobj);
+	                return;
+	            }
+	            // and use a URL or webkitURL (whichever is available to the browser)
+	            // to create a temporary URL to the object
+	            // var URLObj = window.URL || window.webkitURL;
+	            // var source = URLObj.createObjectURL(blob);
+
+	            // // The URL can then be used as the source of an image
+	            // $("#input_content").append(createImage(source));
+	            // return;
+	          }
+	        }
+      	}
+	}
+
+	function createImage(source) {
+	    var pastedImage = new Image();
+	    // pastedImage.onload = function() {
+	    //   createPanel();
+	    // }
+	    pastedImage.src = source;
+	    var imgwidth=pastedImage.width,imgheight=pastedImage.height;
+	    console.log(imgwidth);
+        if(imgwidth>600){
+        	console.log("aaa")
+        	pastedImage.height=600/imgwidth*imgheight;
+        	pastedImage.width=600;
+        };
+	    return pastedImage;
+	  }
+
+
 	$(window).keydown(function(e) {
 		if (e.keyCode == 116) {
 			if (!confirm("刷新将会清除所有聊天记录，确定要刷新么？")) {
