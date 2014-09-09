@@ -82,6 +82,12 @@ $(document).ready(function() {
 		fixedScroll();
 	});
 
+	socket.on('busyerror',function(data){
+		if(data){
+			$("#toolbar").text("禁止刷屏");
+		}
+	})
+
 	//刷新用户在线列表
 	function flushUsers(users) {
 		//清空之前用户列表，添加 "所有人" 选项并默认为灰色选中效果
@@ -123,7 +129,6 @@ $(document).ready(function() {
 	function fixedScroll(){
 		$("#contents").scrollTop($("#contents")[0].scrollHeight);
 	}
-	
 
 	//发话
 	$("#say").click(sendMessage);
@@ -139,23 +144,57 @@ $(document).ready(function() {
 		}
 
 		oldtime=nowtime;
-		var $msg = $("#input_content").text();
-		if ($msg.trim() == ""){
-			$("#toolbar").text("请输入内容！！");
-			return;
+		var $msg = $("#input_content").html();
+		var files = $("#file")[0].files;
+		if(files.length){
+			var reader = new FileReader();
+        	reader.readAsDataURL(files[0]);
+        	var imgobj=new Image(files[0]);
+     	
+        	reader.onload = function(e){
+                var binaryString = this.result;
+                imgobj.src=binaryString;
+                var imgwidth=imgobj.width,imgheight=imgobj.height;
+                if(imgobj.width>600){
+                	imgheight=600/imgwidth*imgheight;
+                	imgwidth=600;
+                };
+                // andle UTF-16 file dump
+                socket.emit('say', {
+					from : from,
+					to : to,
+					pic: binaryString,
+					picwidth:imgwidth,
+					picheight:imgheight,
+					msg: $msg
+				});
+
+                if (to == "all") {
+					$("#contents").append('<div>你(' + now() + ')对 所有人 说：<br/> <img src="' + binaryString + '"  width='+imgwidth+' height='+imgheight+' alt=""/>'+$msg+'</div><br />');
+				} else {
+					$("#contents").append('<div style="color:#00f" >你(' + now() + ')对 ' + to + ' 说：<br/> <img src="' + binaryString + '" alt=""/>'+$msg+'</div><br />');
+				}
+				fixedScroll();
+            }
+            $("#file").val("");
+		}else{
+			if ($msg.trim() == ""){
+				$("#toolbar").text("请输入内容！！");
+				return;
+			}
+			//把发送的信息先添加到自己的浏览器 DOM 中
+			if (to == "all") {
+				$("#contents").append('<div>你(' + now() + ')对 所有人 说：<br/>' + $msg + '</div><br />');
+			} else {
+				$("#contents").append('<div style="color:#00f" >你(' + now() + ')对 ' + to + ' 说：<br/>' + $msg + '</div><br />');
+			}
+			//发送发话信息
+			socket.emit('say', {
+				from : from,
+				to : to,
+				msg : $msg
+			});
 		}
-		//把发送的信息先添加到自己的浏览器 DOM 中
-		if (to == "all") {
-			$("#contents").append('<div>你(' + now() + ')对 所有人 说：<br/>' + $msg + '</div><br />');
-		} else {
-			$("#contents").append('<div style="color:#00f" >你(' + now() + ')对 ' + to + ' 说：<br/>' + $msg + '</div><br />');
-		}
-		//发送发话信息
-		socket.emit('say', {
-			from : from,
-			to : to,
-			msg : $msg
-		});
 		//清空输入框并获得焦点
 		$("#input_content").html("").focus();
 		fixedScroll();

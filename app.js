@@ -64,6 +64,7 @@ io.sockets.on('connection', function(socket) {
 	socket.on('online', function(data) {
 		//将上线的用户名存储为 socket 对象的属性，以区分每个 socket 对象，方便后面使用
 		socket.name = data.user;
+
 		//users 对象中不存在该用户名则插入该用户名
 		if (!users[data.user]) {
 			// users[data.user] = data.user;
@@ -81,9 +82,18 @@ io.sockets.on('connection', function(socket) {
 
 	//有人发话
 	socket.on('say', function(data) {
+		var nowtime=new Date().getTime();	
+		if(/^data:image.*base64/.test(data.pic)){
+			data.msg="<img src='"+data.pic+"' height="+data.picheight+" width="+data.picwidth+" alt=''>"+data.msg;
+		}
 		if (data.to == 'all') {
-			//向其他所有用户广播该用户发话信息
+			//向其他所有用户广播该用户发话信息	
+			if(nowtime-socket.nowtime<1000){
+				data.msg=socket.name+"正在刷屏，大家一起╭∩╮(︶︿︶）╭∩╮鄙视他，他的ip是："+socket.request.connection.remoteAddress;
+				socket.emit('say',data);
+			};
 			socket.broadcast.emit('say', data);
+			
 		} else {
 			//向特定用户发送该用户发话信息
 			//clients 为存储所有连接对象的数组
@@ -91,12 +101,14 @@ io.sockets.on('connection', function(socket) {
 			var clients = socketList;
 			//遍历找到该用户
 			clients.forEach(function(client) {
+
 				if (client.name == data.to) {
 					//触发该用户客户端的 say 事件
 					client.emit('say', data);
 				}
 			});
 		}
+		socket.nowtime=nowtime;
 	});
 
 	//有人下线	
